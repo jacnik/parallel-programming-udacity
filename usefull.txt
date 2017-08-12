@@ -1,0 +1,5 @@
+# compile .cu file
+nvcc cubingNumbers.cu -o cube.out
+
+# run compiled file
+./cube.out
