@@ -3,3 +3,28 @@ nvcc cubingNumbers.cu -o cube.out
 
 # run compiled file
 ./cube.out
+
+# Number of parallel computations:
+KERNEL<<<N_BLOCKS, N_THREADS_PER_BLOCK>>>(...)
+
+N_BLOCK -> any number
+N_THREADS_PER_BLOCK -> max 1024
+
+1280 parallel computations:
+KERNEL<<<10, 128>>>(...) == KERNEL<<<5, 256>>>(...)
+
+# More general:
+KERNEL<<<grid_of_blocks, block_of_threads>>>(...)
+		|		|
+		V		V
+	(1, 2 or 3D)	(1, 2 or 3D)
+
+const dim3 grid_of_blocks(1, 1, 1);  // dim3(w,1,1) == dim3(w) == w
+const dim3 block_of_threads( 1, 1, 1);
+
+
+128 x 128 image (16384 pixels) can be divided into 
+   KERNEL<<<128, 128>>> 
+or KERNEL<<<dim3(8,8,1), dim3(16,16,1)>>> // (64x256)
+
+
