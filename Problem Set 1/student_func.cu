@@ -33,13 +33,13 @@
 
 #include "utils.h"
 #include <stdio.h>
+#include <math.h>
 
 __global__
 void rgba_to_greyscale(const uchar4* const rgbaImage,
                        unsigned char* const greyImage,
                        int numRows, int numCols)
 {
-  //TODO
   //Fill in the kernel to convert from color to greyscale
   //the mapping from components of a uchar4 to RGBA is:
   // .x -> R ; .y -> G ; .z -> B ; .w -> A
@@ -52,19 +52,13 @@ void rgba_to_greyscale(const uchar4* const rgbaImage,
   //to an absolute 2D location in the image, then use that to
   //calculate a 1D offset
 
- 	int row = threadIdx.x; //column
-	int column = blockIdx.x; //row
+	int row = blockIdx.x;	
+	int column = (numCols-1)/(blockIdx.y+1) - threadIdx.x;
 
-	const float WEIGHT_R = 0.299f;
-	const float WEIGHT_G = 0.587f;
-	const float WEIGHT_B = 0.114f;
+	int offset = row + column * numRows;
 
-	int offset = column + row * numCols;
 	uchar4 rgba = rgbaImage[offset];
-	greyImage[offset] = 
-		  rgba.x * WEIGHT_R 
-		+ rgba.y * WEIGHT_G
-		+ rgba.z * WEIGHT_B;
+	greyImage[offset] = .299f * rgba.x + .587f * rgba.y + .114f * rgba.z;
 }
 
 void your_rgba_to_greyscale(const uchar4 * const h_rgbaImage, uchar4 * const d_rgbaImage,
@@ -72,12 +66,18 @@ void your_rgba_to_greyscale(const uchar4 * const h_rgbaImage, uchar4 * const d_r
 {
   //You must fill in the correct sizes for the blockSize and gridSize
   //currently only one block with one thread is being launched
+  const int MAX_THREADS = 1024;
   
+  int n = ceil(numCols*1.0/MAX_THREADS);
+  int th = ceil(numCols/n);
+
   printf("numRows %zu \n", numRows);
   printf("numCols %zu \n", numCols);
-  //todo check if numCols > 1024
-  const dim3 blockSize(numRows, 1, 1);  //TODO
-  const dim3 gridSize(numCols, 1, 1);  //TODO
+  printf("grid size: %zu, %d \n", numRows, n);
+  printf("threads: %d \n", th);
+  
+  const dim3 blockSize(th, 1, 1);
+  const dim3 gridSize(numRows, n, 1);
   rgba_to_greyscale<<<gridSize, blockSize>>>(d_rgbaImage, d_greyImage, numRows, numCols);
   
   cudaDeviceSynchronize(); checkCudaErrors(cudaGetLastError());
