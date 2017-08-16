@@ -52,13 +52,16 @@ void rgba_to_greyscale(const uchar4* const rgbaImage,
   //to an absolute 2D location in the image, then use that to
   //calculate a 1D offset
 
-	int row = blockIdx.x;	
-	int column = (numCols-1)/(blockIdx.y+1) - threadIdx.x;
+  int row = blockIdx.x;	
+  int column = (numCols-1)/(blockIdx.y+1) - threadIdx.x;
 
-	int offset = row + column * numRows;
+  int offset = row + column * numRows;
 
-	uchar4 rgba = rgbaImage[offset];
-	greyImage[offset] = .299f * rgba.x + .587f * rgba.y + .114f * rgba.z;
+  uchar4 rgba = rgbaImage[offset];
+  greyImage[offset] = 
+	  0.299f * rgba.x 
+	+ 0.587f * rgba.y 
+	+ 0.114f * rgba.z;
 }
 
 void your_rgba_to_greyscale(const uchar4 * const h_rgbaImage, uchar4 * const d_rgbaImage,
