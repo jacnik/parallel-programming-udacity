@@ -52,16 +52,28 @@ void rgba_to_greyscale(const uchar4* const rgbaImage,
   //to an absolute 2D location in the image, then use that to
   //calculate a 1D offset
 
-  int row = blockIdx.x;	
-  int column = (numCols-1)/(blockIdx.y+1) - threadIdx.x;
+  // pixel(i,j)
+  // uint i = (blockIdx.x * blockDim.x) + threadIdx.x;
+  // uint j = (blockIdx.y * blockDim.y) + threadIdx.y;
 
-  int offset = row + column * numRows;
+  int row = threadIdx.x + blockIdx.x * blockDim.x;
+  int column = threadIdx.x;
 
-  uchar4 rgba = rgbaImage[offset];
-  greyImage[offset] = 
-	  0.299f * rgba.x 
-	+ 0.587f * rgba.y 
-	+ 0.114f * rgba.z;
+  if (threadIdx.x == 1 && blockIdx.x == 312) {
+ 
+    printf("blockIdx.x %d \n", blockIdx.x);
+    printf("gridDim.x %d \n", gridDim.x);
+  }
+
+  //int offset = row * numCols + column;
+  int offset = threadIdx.x + blockIdx.x * blockDim.x;
+  //uchar4 rgba = rgbaImage[offset];
+  greyImage[offset] = 256 - 1 - (offset % 256);
+
+  //greyImage[offset] = 
+  //	  0.299f * rgba.x 
+  //	+ 0.587f * rgba.y 
+  //	+ 0.114f * rgba.z;
 }
 
 void your_rgba_to_greyscale(const uchar4 * const h_rgbaImage, uchar4 * const d_rgbaImage,
@@ -71,16 +83,27 @@ void your_rgba_to_greyscale(const uchar4 * const h_rgbaImage, uchar4 * const d_r
   //currently only one block with one thread is being launched
   const int MAX_THREADS = 1024;
   
-  int n = ceil(numCols*1.0/MAX_THREADS);
-  int th = ceil(numCols/n);
+  //int n = ceil(numCols*1.0/MAX_THREADS);
+  //int th = ceil(numCols/n);
 
-  printf("numRows %zu \n", numRows);
-  printf("numCols %zu \n", numCols);
-  printf("grid size: %zu, %d \n", numRows, n);
-  printf("threads: %d \n", th);
+  //printf("numRows %zu \n", numRows);
+  //printf("numCols %zu \n", numCols);
+  //printf("grid size: %zu, %d \n", numRows, n);
+  //printf("threads: %d \n", th);
+  // ??? The number of threads per block should be a round multiple of the warp size, which is 32 on all current hardware.
   
-  const dim3 blockSize(th, 1, 1);
-  const dim3 gridSize(numRows, n, 1);
+  //int nThreadsNeeded = numRows * numCols;
+  
+  dim3 threadsPerBlock(32, 32); // 1024 threads per block
+
+  dim3 numBlocks(
+    numCols/threadsPerBlock.x,  /* for instance 512/8 = 64*/
+    numRows/threadsPerBlock.y); 
+
+  //myKernel <<<numBlocks,threadsPerBlock>>>( /* params for the kernel function */ );       
+
+  const dim3 gridSize(numRows, 1, 1);
+  const dim3 blockSize(numCols, 1, 1);
   rgba_to_greyscale<<<gridSize, blockSize>>>(d_rgbaImage, d_greyImage, numRows, numCols);
   
   cudaDeviceSynchronize(); checkCudaErrors(cudaGetLastError());
