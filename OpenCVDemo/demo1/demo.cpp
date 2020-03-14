@@ -1,6 +1,11 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/viz/vizcore.hpp>
 
+// todo lint this /usr/local/include/opencv2/viz/vizcore.hpp
+// and this/usr/local/include/opencv2/core/core.hpp
+
+
+
 int main()
 {
     cv::viz::Viz3d window = cv::viz::Viz3d("Viz demonstration");

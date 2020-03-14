@@ -12,6 +12,15 @@ nvcc cubingNumbers.cu -o cube.out
 ./cube.out
 ```
 
+# Build
+
+```sh
+mkdir build
+cd build
+cmake -DCMAKE_CXX_FLAGS="-std=c++11" ..
+make
+```
+
 ## Number of parallel computations:
 KERNEL<<<N_BLOCKS, N_THREADS_PER_BLOCK>>>(...)
 
@@ -96,3 +105,18 @@ structure of arrays (SoA) => [f][f][f][f][i][i][i][i]
 
 ## Shared memory declaration: __shared__ int array[128];
 ## Barrier: __syncthreads();
+
+
+# Building OpenCV
+```sh
+# in openCV Directory
+mkdir build
+cd build
+cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_GENERATE_PKGCONFIG=ON -D BUILD_EXAMPLES=ON -D WITH_VTK=ON ..
+sudo make -j8
+sudo make install
+```
+path to linking openCV:
+```sh
+/usr/local/include/opencv4/
+```
