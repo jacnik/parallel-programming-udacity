@@ -15,7 +15,7 @@
 
 //To convert an image from color to grayscale one simple method is to
 //set the intensity to the average of the RGB channels.  But we will
-//use a more sophisticated method that takes into account how the eye 
+//use a more sophisticated method that takes into account how the eye
 //perceives color and weights the channels unequally.
 
 //The eye responds most strongly to green followed by red and then blue.
@@ -24,7 +24,7 @@
 
 //I = .299f * R + .587f * G + .114f * B
 
-//Notice the trailing f's on the numbers which indicate that they are 
+//Notice the trailing f's on the numbers which indicate that they are
 //single precision floating point constants and not double precision
 //constants.
 
@@ -60,7 +60,7 @@ void rgba_to_greyscale(const uchar4* const rgbaImage,
   int column = threadIdx.x;
 
   if (threadIdx.x == 1 && blockIdx.x == 312) {
- 
+
     printf("blockIdx.x %d \n", blockIdx.x);
     printf("gridDim.x %d \n", gridDim.x);
   }
@@ -70,9 +70,9 @@ void rgba_to_greyscale(const uchar4* const rgbaImage,
   //uchar4 rgba = rgbaImage[offset];
   greyImage[offset] = 256 - 1 - (offset % 256);
 
-  //greyImage[offset] = 
-  //	  0.299f * rgba.x 
-  //	+ 0.587f * rgba.y 
+  //greyImage[offset] =
+  //	  0.299f * rgba.x
+  //	+ 0.587f * rgba.y
   //	+ 0.114f * rgba.z;
 }
 
@@ -82,7 +82,7 @@ void your_rgba_to_greyscale(const uchar4 * const h_rgbaImage, uchar4 * const d_r
   //You must fill in the correct sizes for the blockSize and gridSize
   //currently only one block with one thread is being launched
   const int MAX_THREADS = 1024;
-  
+
   //int n = ceil(numCols*1.0/MAX_THREADS);
   //int th = ceil(numCols/n);
 
@@ -91,21 +91,21 @@ void your_rgba_to_greyscale(const uchar4 * const h_rgbaImage, uchar4 * const d_r
   //printf("grid size: %zu, %d \n", numRows, n);
   //printf("threads: %d \n", th);
   // ??? The number of threads per block should be a round multiple of the warp size, which is 32 on all current hardware.
-  
+
   //int nThreadsNeeded = numRows * numCols;
-  
+
   dim3 threadsPerBlock(32, 32); // 1024 threads per block
 
   dim3 numBlocks(
     numCols/threadsPerBlock.x,  /* for instance 512/8 = 64*/
-    numRows/threadsPerBlock.y); 
+    numRows/threadsPerBlock.y);
 
-  //myKernel <<<numBlocks,threadsPerBlock>>>( /* params for the kernel function */ );       
+  //myKernel <<<numBlocks,threadsPerBlock>>>( /* params for the kernel function */ );
 
   const dim3 gridSize(numRows, 1, 1);
   const dim3 blockSize(numCols, 1, 1);
   rgba_to_greyscale<<<gridSize, blockSize>>>(d_rgbaImage, d_greyImage, numRows, numCols);
-  
-  cudaDeviceSynchronize(); checkCudaErrors(cudaGetLastError());
 
+  cudaDeviceSynchronize();
+  checkCudaErrors(cudaGetLastError());
 }
