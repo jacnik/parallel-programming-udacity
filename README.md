@@ -112,9 +112,12 @@ structure of arrays (SoA) => [f][f][f][f][i][i][i][i]
 # in openCV Directory
 mkdir build
 cd build
-cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_GENERATE_PKGCONFIG=ON -D BUILD_EXAMPLES=ON -D WITH_VTK=ON -D VTK_DIR=/home/jacek/Downloads/VTK-8.2.0/build ..
+sudo cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_GENERATE_PKGCONFIG=ON -D BUILD_EXAMPLES=ON -D OPENCV_EXTRA_MODULES_PATH=../opencv_contrib-4.2.0/modules -D BUILD_opencv_surface_matching=OFF -D BUILD_opencv_superres=OFF -D BUILD_opencv_tracking=OFF -D BUILD_opencv_rgbd=OFF -D BUILD_opencv_line_descriptor=OFF ..
 sudo make -j8
 sudo make install
+
+# to uninstall go to the same directory and run:
+sudo make uninstall
 ```
 path to linking openCV:
 ```sh

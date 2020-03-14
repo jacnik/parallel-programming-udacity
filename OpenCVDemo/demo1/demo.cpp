@@ -2,7 +2,6 @@
 #include <opencv2/viz/vizcore.hpp>
 
 
-
 int main()
 {
     cv::viz::Viz3d window = cv::viz::Viz3d("Viz demonstration");
