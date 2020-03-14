@@ -112,7 +112,7 @@ structure of arrays (SoA) => [f][f][f][f][i][i][i][i]
 # in openCV Directory
 mkdir build
 cd build
-cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_GENERATE_PKGCONFIG=ON -D BUILD_EXAMPLES=ON -D WITH_VTK=ON ..
+cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_GENERATE_PKGCONFIG=ON -D BUILD_EXAMPLES=ON -D WITH_VTK=ON -D VTK_DIR=/home/jacek/Downloads/VTK-8.2.0/build ..
 sudo make -j8
 sudo make install
 ```
