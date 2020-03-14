@@ -53,16 +53,20 @@ void rgba_to_greyscale(const uchar4* const rgbaImage,
   //to an absolute 2D location in the image, then use that to
   //calculate a 1D offset
 
-  int column = threadIdx.x;
-	int row = blockIdx.x;
-
   const float WEIGHT_R = 0.299f;
 	const float WEIGHT_G = 0.587f;
   const float WEIGHT_B = 0.114f;
 
-  int offset = row + column * numRows;
+  // pixel(x,y)
+
+  int x = (blockIdx.x * blockDim.x) + threadIdx.x;
+  int y = (blockIdx.y * blockDim.y) + threadIdx.y;
+
+  int offset = x + y * numCols;
 
   uchar4 rgba = rgbaImage[offset];
+
+  // greyImage[offset] = y % 255;
 
   greyImage[offset] =
       rgba.x * WEIGHT_R
@@ -73,11 +77,17 @@ void rgba_to_greyscale(const uchar4* const rgbaImage,
 void your_rgba_to_greyscale(const uchar4 * const h_rgbaImage, uchar4 * const d_rgbaImage,
                             unsigned char* const d_greyImage, size_t numRows, size_t numCols)
 {
+  // numRows -> image height
+  // numColumns -> image width
 
-  //const int MAX_THREADS = 1024;
-  const dim3 gridSize(numRows, 1, 1);
-  const dim3 blockSize(numCols, 1, 1);
-  rgba_to_greyscale<<<numCols, numRows>>>(d_rgbaImage, d_greyImage, numRows, numCols);
+  // printf("numCols %d \n", numCols);
+  // printf("numRows %d \n", numRows);
+
+  const dim3 threadsPerBlock(8, 8);
+  const dim3 numBlocks(numCols / threadsPerBlock.x,
+                        numRows / threadsPerBlock.y);
+
+  rgba_to_greyscale<<<numBlocks, threadsPerBlock>>>(d_rgbaImage, d_greyImage, numRows, numCols);
 
   cudaDeviceSynchronize();
   checkCudaErrors(cudaGetLastError());
