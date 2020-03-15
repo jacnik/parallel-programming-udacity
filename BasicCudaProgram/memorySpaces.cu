@@ -1,13 +1,15 @@
 /*
-    Example code showing use of bariers to synchronize all threads in a block.
-    Barier is set with __syncthreads();
+    Using different memory spaces in CUDA
 
-    Job of this program is:
-    1. Initialize array with threadIndex
-    2. At each index assign value of index + 1
+    Example code showing use of local, shared ang gobal memory.
 
-    Compile: nvcc shiftLeft.cu -o shiftLeft.out
-    Run: ./shiftLeft
+    Rule to write fast code is to move frequently accessed data to fast memory.
+
+    speed accesssing each memory types:
+    local < shared << global << cpu ('host')
+
+    Compile: nvcc memorySpaces.cu -o memorySpaces.out
+    Run: ./memorySpaces
 */
 
 #include <stdio.h>
