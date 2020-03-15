@@ -55,12 +55,18 @@ or KERNEL<<<dim3(8,8,1), dim3(16,16,1)>>> // (64x256)
  V  V  V  V  V
 [6][7][8][9][10] Out
 
+Read from one address, compute result and write to one adress.
+one-to-one
+
 2. Gather:
 [1][2][3][4][5]  In
  |_/|_/|_/|_/|
  |  |  |  |  |
  V  V  V  V  V
 [6][7][8][9][10] Out
+
+Read from multiple addresses, compute result and write to one adress.
+many-to-one
 
 3. Scatter:
 [1][2][3][4][5]  In
@@ -69,13 +75,19 @@ or KERNEL<<<dim3(8,8,1), dim3(16,16,1)>>> // (64x256)
  V  V  V  V  V
 [6][7][8][9][10] Out
 
+Read from one address, compute result and write to multiple adresses.
+Or
+Read from one address, compute result and one adress to write to, and write to one adress.
+one-to-many
 
 4. Traspose:
+one-to-one
+
 [ 1][ 2][ 3][ 4][ 5]
 [ 6][ 7][ 8][ 9][10]
 [11][12][13][14][15]
 
-== In Row Major Order == [ 1][ 2][ 3][ 4][ 5][ 6][ 7][ 8][ 9][10][11][12][13][14][15]
+:: In Row Major Order => [ 1][ 2][ 3][ 4][ 5][ 6][ 7][ 8][ 9][10][11][12][13][14][15]
 
 After transpose:
 [ 1][ 6][11]
@@ -84,7 +96,7 @@ After transpose:
 [ 4][ 9][14]
 [ 5][10][15]
 
-== In Column Major Order == [ 1][ 6][11][ 2][ 7][12][ 3][ 8][13][ 4][ 9][14][ 5][10][15]
+:: In Column Major Order => [ 1][ 6][11][ 2][ 7][12][ 3][ 8][13][ 4][ 9][14][ 5][10][15]
 
 Transpose on structures:
 
@@ -93,14 +105,39 @@ struct foo {
   int i;
 };
 
-array of structures (AoS) => [f][i][f][i][f][i][f][i]
-	   ||
-Transpose  ||
-	   VV
-structure of arrays (SoA) => [f][f][f][f][i][i][i][i]
+:: array of structures (AoS) => [f][i][f][i][f][i][f][i]
+              ||
+              || Transpose
+              VV
+:: structure of arrays (SoA) => [f][f][f][f][i][i][i][i]
 
 
 5. Stencil -> update each element of an array using neighbouring elements (using pattern called 'stencil').
+it is like a specialized gather (several-to-one)
+        [a]
+     [b][c][d]
+        [e]
+         |
+         V
+        [ ]
+[ ][a+b+c+d+e][ ]
+        [ ]
+
+6. Reduce:
+all-to-one
+[]----->[]--->[]
+[]-/ -->[]-/
+[]--//
+[]-//
+[]-/
+
+7. Scan/sort
+all-to-all
+[ ][ ][ ][ ][ ]
+ |  |  \  |  /
+ \ /    \/  /
+ / \    /\ /
+[ ][ ][ ][ ][ ]
 ```
 
 ## Shared memory declaration: __shared__ int array[128];
