@@ -105,5 +105,8 @@ int main(int argc, char **argv)
     // copy the modified array back to the host
     cudaMemcpy((void *)h_arr, (void *)d_arr, sizeof(float) * 128, cudaMemcpyHostToDevice);
     // ... do other stuff ...
+
+    cudaFree(d_arr);
+
     return 0;
 }
