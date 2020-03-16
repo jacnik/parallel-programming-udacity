@@ -141,17 +141,25 @@ void separateChannels(const uchar4* const inputImageRGBA,
                       unsigned char* const greenChannel,
                       unsigned char* const blueChannel)
 {
-  // TODO
-  //
+  // pixel(x,y)
+  const int x = (blockIdx.x + blockDim.x) + threadIdx.x;
+  const int y = (blockIdx.y + blockDim.y) + threadIdx.y;
+
   // NOTE: Be careful not to try to access memory that is outside the bounds of
   // the image. You'll want code that performs the following check before accessing
   // GPU memory:
-  //
-  // if ( absolute_image_position_x >= numCols ||
-  //      absolute_image_position_y >= numRows )
-  // {
-  //     return;
-  // }
+  if ( x >= numCols || y >= numRows )
+  {
+      return;
+  }
+
+  const int i = y * numCols + x;
+
+  const uchar4 rgba = inputImageRGBA[i];
+
+  redChannel[i] = rgba.x;
+  greenChannel[i] = rgba.y;
+  blueChannel[i] = rgba.z;
 }
 
 //This kernel takes in three color channels and recombines them
@@ -195,7 +203,6 @@ void allocateMemoryAndCopyToGPU(const size_t numRowsImage, const size_t numColsI
   //printf("numRows: %lu \n", numRowsImage);
   //printf("numCols: %lu \n", numColsImage);
   //printf("filterWidth: %lu \n", filterWidth);
-
 
   //allocate memory for the three different channels
   //original
@@ -251,7 +258,10 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
   // launching your kernel to make sure that you didn't make any mistakes.
   cudaDeviceSynchronize(); checkCudaErrors(cudaGetLastError());
 
-  //TODO: Call your convolution kernel here 3 times, once for each color channel.
+  //Call your convolution kernel here 3 times, once for each color channel.
+  gaussian_blur<<<gridSize, blockSize>>>(d_red, d_redBlurred, numRows, numCols, d_filter, filterWidth);
+  // gaussian_blur<<<gridSize, blockSize>>>(d_green, d_greenBlurred, numRows, numCols, d_filter, filterWidth);
+  // gaussian_blur<<<gridSize, blockSize>>>(d_blue, d_blueBlurred, numRows, numCols, d_filter, filterWidth);
 
   // Again, call cudaDeviceSynchronize(), then call checkCudaErrors() immediately after
   // launching your kernel to make sure that you didn't make any mistakes.
