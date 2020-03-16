@@ -108,7 +108,9 @@ void gaussian_blur(const unsigned char* const inputChannel,
                    int numRows, int numCols,
                    const float* const filter, const int filterWidth)
 {
-  // TODO
+  // pixel(x,y)
+  const int x = (blockIdx.x * blockDim.x) + threadIdx.x;
+  const int y = (blockIdx.y * blockDim.y) + threadIdx.y;
 
   // NOTE: Be sure to compute any intermediate results in floating point
   // before storing the final result as unsigned char.
@@ -117,11 +119,14 @@ void gaussian_blur(const unsigned char* const inputChannel,
   // the image. You'll want code that performs the following check before accessing
   // GPU memory:
   //
-  // if ( absolute_image_position_x >= numCols ||
-  //      absolute_image_position_y >= numRows )
-  // {
-  //     return;
-  // }
+  if ( x >= numCols || y >= numRows )
+  {
+      return;
+  }
+
+  const auto i = y * numCols + x;
+
+  outputChannel[i] = 0;
 
   // NOTE: If a thread's absolute position 2D position is within the image, but some of
   // its neighbors are outside the image, then you will need to be extra careful. Instead
@@ -142,8 +147,8 @@ void separateChannels(const uchar4* const inputImageRGBA,
                       unsigned char* const blueChannel)
 {
   // pixel(x,y)
-  const int x = (blockIdx.x + blockDim.x) + threadIdx.x;
-  const int y = (blockIdx.y + blockDim.y) + threadIdx.y;
+  const int x = (blockIdx.x * blockDim.x) + threadIdx.x;
+  const int y = (blockIdx.y * blockDim.y) + threadIdx.y;
 
   // NOTE: Be careful not to try to access memory that is outside the bounds of
   // the image. You'll want code that performs the following check before accessing
@@ -246,10 +251,21 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
   //TODO:
   //Compute correct grid size (i.e., number of blocks per kernel launch)
   //from the image size and and block size.
-  const dim3 gridSize(
-    (numCols / blockSize.x) + 1,
-    (numRows / blockSize.y) + 1
-  ); // = numBlocks
+
+  const int gridx = (numCols / blockSize.x) + 1;
+  const int gridy = (numRows / blockSize.y) + 1;
+
+  printf("Image Size: \n");
+  printf("\trows: %lu \n", numRows);
+  printf("\tcols: %lu \n", numCols);
+
+  printf("Grid Size: \n");
+  printf("\tx: %i \n", gridx);
+  printf("\ty: %i \n", gridy);
+
+  printf("Filter width: %i \n", filterWidth);
+
+  const dim3 gridSize(gridx, gridy); // = numBlocks
 
   //Launch a kernel for separating the RGBA image into different color channels
   separateChannels<<<gridSize, blockSize>>>(d_inputImageRGBA, numRows, numCols, d_redBlurred, d_greenBlurred, d_blueBlurred);
