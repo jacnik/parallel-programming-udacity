@@ -192,13 +192,17 @@ void allocateMemoryAndCopyToGPU(const size_t numRowsImage, const size_t numColsI
                                 const float* const h_filter, const size_t filterWidth)
 {
 
+  //printf("numRows: %lu \n", numRowsImage);
+  //printf("numCols: %lu \n", numColsImage);
+  //printf("filterWidth: %lu \n", filterWidth);
+
+
   //allocate memory for the three different channels
   //original
   checkCudaErrors(cudaMalloc(&d_red,   sizeof(unsigned char) * numRowsImage * numColsImage));
   checkCudaErrors(cudaMalloc(&d_green, sizeof(unsigned char) * numRowsImage * numColsImage));
   checkCudaErrors(cudaMalloc(&d_blue,  sizeof(unsigned char) * numRowsImage * numColsImage));
 
-  //TODO:
   //Allocate memory for the filter on the GPU
   //Use the pointer d_filter that we have already declared for you
   //You need to allocate memory for the filter with cudaMalloc
@@ -206,11 +210,20 @@ void allocateMemoryAndCopyToGPU(const size_t numRowsImage, const size_t numColsI
   //be able to tell if anything goes wrong
   //IMPORTANT: Notice that we pass a pointer to a pointer to cudaMalloc
 
-  //TODO:
+  // filter is a square, so it's total number of elements is filterWidth^2
+  const size_t nFilterElements = filterWidth * filterWidth;
+  const size_t nFilterBytes = sizeof(float) * nFilterElements;
+
+  checkCudaErrors(
+    cudaMalloc(&d_filter, nFilterBytes)
+  );
+
   //Copy the filter on the host (h_filter) to the memory you just allocated
   //on the GPU.  cudaMemcpy(dst, src, numBytes, cudaMemcpyHostToDevice);
   //Remember to use checkCudaErrors!
-
+  checkCudaErrors(
+    cudaMemcpy(d_filter, h_filter, nFilterBytes, cudaMemcpyHostToDevice)
+  );
 }
 
 void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_inputImageRGBA,
