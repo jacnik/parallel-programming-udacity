@@ -109,8 +109,8 @@ void gaussian_blur(const unsigned char* const inputChannel,
                    const float* const filter, const int filterWidth)
 {
   // pixel(x,y)
-  const int x = (blockIdx.x * blockDim.x) + threadIdx.x;
-  const int y = (blockIdx.y * blockDim.y) + threadIdx.y;
+  const int x = (blockIdx.x * blockDim.x) + threadIdx.x; // column
+  const int y = (blockIdx.y * blockDim.y) + threadIdx.y; // row
 
   // NOTE: Be sure to compute any intermediate results in floating point
   // before storing the final result as unsigned char.
@@ -126,7 +126,41 @@ void gaussian_blur(const unsigned char* const inputChannel,
 
   const auto i = y * numCols + x;
 
-  outputChannel[i] = 0;
+  const auto filterHalf = filterWidth / 2;
+
+  float acc = 0.0f;
+  for (auto row = -1*filterHalf; row <= filterHalf; ++row) {
+    for (auto col = -1*filterHalf; col <= filterHalf; ++col) {
+      auto imgRow = min(max(y + row, 0), numRows-1);
+      auto imgCol = min(max(x + col, 0), numCols-1);
+      auto imgIndex = imgRow * numCols + imgRow;
+
+      auto filterRow = row + filterHalf;
+      auto filterCol = col + filterHalf;
+      auto filterIndex = filterRow * filterWidth + filterCol;
+
+      if (x < 1 && y < 1) {
+        // printf("filterRow= %i \n", filterRow);
+        // printf("filterCol= %i \n", filterCol);
+        // printf("filterIndex= %i \n", filterIndex);
+        // printf("filter[Index]= %f \n", filter[filterIndex]);
+
+        printf("imgRow= %i \n", imgRow);
+        printf("imgCol= %i \n", imgCol);
+        printf("imgIndex= %i \n", imgIndex);
+        printf("img[Index]= %f \n", inputChannel[imgIndex]);
+      }
+
+      acc += inputChannel[imgIndex] * filter[filterIndex];
+    }
+  }
+
+  if (x < 1 && y < 1) {
+    printf("acc= %f \n", acc);
+    printf("static_cast<char>(acc)= %f \n", static_cast<char>(acc));
+  }
+
+  outputChannel[i] = static_cast<char>(acc);
 
   // NOTE: If a thread's absolute position 2D position is within the image, but some of
   // its neighbors are outside the image, then you will need to be extra careful. Instead
@@ -275,9 +309,9 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
   cudaDeviceSynchronize(); checkCudaErrors(cudaGetLastError());
 
   //Call your convolution kernel here 3 times, once for each color channel.
-  gaussian_blur<<<gridSize, blockSize>>>(d_red, d_redBlurred, numRows, numCols, d_filter, filterWidth);
-  // gaussian_blur<<<gridSize, blockSize>>>(d_green, d_greenBlurred, numRows, numCols, d_filter, filterWidth);
-  // gaussian_blur<<<gridSize, blockSize>>>(d_blue, d_blueBlurred, numRows, numCols, d_filter, filterWidth);
+  gaussian_blur<<<gridSize, blockSize>>>(d_red,   d_redBlurred,   numRows, numCols, d_filter, filterWidth);
+  gaussian_blur<<<gridSize, blockSize>>>(d_green, d_greenBlurred, numRows, numCols, d_filter, filterWidth);
+  gaussian_blur<<<gridSize, blockSize>>>(d_blue,  d_blueBlurred,  numRows, numCols, d_filter, filterWidth);
 
   // Again, call cudaDeviceSynchronize(), then call checkCudaErrors() immediately after
   // launching your kernel to make sure that you didn't make any mistakes.

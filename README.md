@@ -143,6 +143,8 @@ all-to-all
 ## Shared memory declaration: __shared__ int array[128];
 ## Barrier: __syncthreads();
 
+## Memory layout for fast access:
+coalesced < strided < random 
 
 # Building OpenCV
 ```sh
