@@ -154,6 +154,11 @@ void gaussian_blur(const unsigned char* const inputChannel,
     }
   }
 
+  if ( i == (557 / 2) + (313/2) * numCols) {
+    printf("i = %i, (x,y) = (%i, %i) \n", i, x, y);
+    printf("inputChannel[i] = (%d) \n", inputChannel[i]);
+  }
+
   // if (i == 5 * numCols + 5 ) {
   //   printf("i: = %i : (x, y) = (%i, %i) \n", i, x, y);
   // }
@@ -195,11 +200,11 @@ void separateChannels(const uchar4* const inputImageRGBA,
       return;
   }
 
-  const int i = y * numCols + x;
+  const int i = x + y * numCols;
 
   const uchar4 rgba = inputImageRGBA[i];
 
-  if ( i < 4 ) {
+  if ( i == (557 / 2) + (313/2) * numCols) {
     printf("i = %i, (x,y) = (%i, %i) \n", i, x, y);
     printf("rgba.x = %d\n", rgba.x);
     printf("rgba.y = %d\n", rgba.y);
