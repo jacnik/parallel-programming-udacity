@@ -131,34 +131,37 @@ void gaussian_blur(const unsigned char* const inputChannel,
   float acc = 0.0f;
   for (auto row = -1*filterHalf; row <= filterHalf; ++row) {
     for (auto col = -1*filterHalf; col <= filterHalf; ++col) {
+
       auto imgRow = min(max(y + row, 0), numRows-1);
       auto imgCol = min(max(x + col, 0), numCols-1);
-      auto imgIndex = imgRow * numCols + imgRow;
+      auto imgIndex = imgRow * numCols + imgCol;
 
       auto filterRow = row + filterHalf;
       auto filterCol = col + filterHalf;
       auto filterIndex = filterRow * filterWidth + filterCol;
 
-      if (x < 1 && y < 1) {
-        // printf("filterRow= %i \n", filterRow);
-        // printf("filterCol= %i \n", filterCol);
-        // printf("filterIndex= %i \n", filterIndex);
-        // printf("filter[Index]= %f \n", filter[filterIndex]);
+      // if (i == 4 * numCols + 4 && filterIndex < 11) {
 
-        printf("imgRow= %i \n", imgRow);
-        printf("imgCol= %i \n", imgCol);
-        printf("imgIndex= %i \n", imgIndex);
-        printf("img[Index]= %f \n", inputChannel[imgIndex]);
-      }
+        // printf("imgIndex= %i \n", imgIndex);
+        // printf("filterIndex= %i \n", filterIndex);
+
+      //   printf("\tinputChannel[imgIndex]= %d \n", inputChannel[imgIndex]);
+      //   printf("\tfilter[filterIndex]= %f \n", filter[filterIndex]);
+
+      // }
 
       acc += inputChannel[imgIndex] * filter[filterIndex];
     }
   }
 
-  if (x < 1 && y < 1) {
-    printf("acc= %f \n", acc);
-    printf("static_cast<char>(acc)= %f \n", static_cast<char>(acc));
-  }
+  // if (i == 5 * numCols + 5 ) {
+  //   printf("i: = %i : (x, y) = (%i, %i) \n", i, x, y);
+  // }
+
+  // if (x < 1 && y < 1) {
+  //   printf("acc= %f \n", acc);
+  //   printf("static_cast<char>(acc)= %f \n", static_cast<char>(acc));
+  // }
 
   outputChannel[i] = static_cast<char>(acc);
 
@@ -195,6 +198,15 @@ void separateChannels(const uchar4* const inputImageRGBA,
   const int i = y * numCols + x;
 
   const uchar4 rgba = inputImageRGBA[i];
+
+  if ( i < 4 ) {
+    printf("i = %i, (x,y) = (%i, %i) \n", i, x, y);
+    printf("rgba.x = %d\n", rgba.x);
+    printf("rgba.y = %d\n", rgba.y);
+    printf("rgba.z = %d\n", rgba.z);
+    printf("\n");
+
+  }
 
   redChannel[i] = rgba.x;
   greenChannel[i] = rgba.y;
@@ -282,22 +294,21 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
   //TODO: Set reasonable block size (i.e., number of threads per block)
   const dim3 blockSize(filterWidth, filterWidth); // = threadsPerBlock
 
-  //TODO:
   //Compute correct grid size (i.e., number of blocks per kernel launch)
   //from the image size and and block size.
 
   const int gridx = (numCols / blockSize.x) + 1;
   const int gridy = (numRows / blockSize.y) + 1;
 
-  printf("Image Size: \n");
-  printf("\trows: %lu \n", numRows);
-  printf("\tcols: %lu \n", numCols);
+  // printf("Image Size: \n");
+  // printf("\trows: %lu \n", numRows);
+  // printf("\tcols: %lu \n", numCols);
 
-  printf("Grid Size: \n");
-  printf("\tx: %i \n", gridx);
-  printf("\ty: %i \n", gridy);
+  // printf("Grid Size: \n");
+  // printf("\tx: %i \n", gridx);
+  // printf("\ty: %i \n", gridy);
 
-  printf("Filter width: %i \n", filterWidth);
+  // printf("Filter width: %i \n", filterWidth);
 
   const dim3 gridSize(gridx, gridy); // = numBlocks
 
@@ -310,8 +321,8 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
 
   //Call your convolution kernel here 3 times, once for each color channel.
   gaussian_blur<<<gridSize, blockSize>>>(d_red,   d_redBlurred,   numRows, numCols, d_filter, filterWidth);
-  gaussian_blur<<<gridSize, blockSize>>>(d_green, d_greenBlurred, numRows, numCols, d_filter, filterWidth);
-  gaussian_blur<<<gridSize, blockSize>>>(d_blue,  d_blueBlurred,  numRows, numCols, d_filter, filterWidth);
+  // gaussian_blur<<<gridSize, blockSize>>>(d_green, d_greenBlurred, numRows, numCols, d_filter, filterWidth);
+  // gaussian_blur<<<gridSize, blockSize>>>(d_blue,  d_blueBlurred,  numRows, numCols, d_filter, filterWidth);
 
   // Again, call cudaDeviceSynchronize(), then call checkCudaErrors() immediately after
   // launching your kernel to make sure that you didn't make any mistakes.
