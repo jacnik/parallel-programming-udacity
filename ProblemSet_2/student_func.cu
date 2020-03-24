@@ -126,11 +126,6 @@ void gaussian_blur(const unsigned char* const inputChannel,
 
   const auto i = y * numCols + x;
 
-  // if ( i == (557 / 2) + (313/2) * numCols) {
-  //   printf("i = %i, (x,y) = (%i, %i) \n", i, x, y);
-  //   printf("inputChannel[i] = %d \n", inputChannel[i]);
-  // }
-
   const auto filterHalf = filterWidth / 2;
 
   float acc = 0.0f;
@@ -145,33 +140,9 @@ void gaussian_blur(const unsigned char* const inputChannel,
       auto filterCol = col + filterHalf;
       auto filterIndex = filterRow * filterWidth + filterCol;
 
-      // if (i == 4 * numCols + 4 && filterIndex < 11) {
-
-        // printf("imgIndex= %i \n", imgIndex);
-        // printf("filterIndex= %i \n", filterIndex);
-
-      //   printf("\tinputChannel[imgIndex]= %d \n", inputChannel[imgIndex]);
-      //   printf("\tfilter[filterIndex]= %f \n", filter[filterIndex]);
-
-      // }
-
       acc += inputChannel[imgIndex] * filter[filterIndex];
     }
   }
-
-  // if ( i == (557 / 2) + (313/2) * numCols) {
-  //   printf("i = %i, (x,y) = (%i, %i) \n", i, x, y);
-  //   printf("inputChannel[i] = (%d) \n", inputChannel[i]);
-  // }
-
-  // if (i == 5 * numCols + 5 ) {
-  //   printf("i: = %i : (x, y) = (%i, %i) \n", i, x, y);
-  // }
-
-  // if (x < 1 && y < 1) {
-  //   printf("acc= %f \n", acc);
-  //   printf("static_cast<char>(acc)= %f \n", static_cast<char>(acc));
-  // }
 
   outputChannel[i] = static_cast<char>(acc);
 
@@ -208,14 +179,6 @@ void separateChannels(const uchar4* const inputImageRGBA,
   const int i = x + y * numCols;
 
   const uchar4 rgba = inputImageRGBA[i];
-
-  // if ( i == (557 / 2) + (313/2) * numCols) {
-  //   printf("i = %i, (x,y) = (%i, %i) \n", i, x, y);
-  //   printf("rgba.x = %d\n", rgba.x);
-  //   printf("rgba.y = %d\n", rgba.y);
-  //   printf("rgba.z = %d\n", rgba.z);
-  //   printf("\n");
-  // }
 
   redChannel[i] = rgba.x;
   greenChannel[i] = rgba.y;
@@ -260,12 +223,7 @@ void allocateMemoryAndCopyToGPU(const size_t numRowsImage, const size_t numColsI
                                 const float* const h_filter, const size_t filterWidth)
 {
 
-  //printf("numRows: %lu \n", numRowsImage);
-  //printf("numCols: %lu \n", numColsImage);
-  //printf("filterWidth: %lu \n", filterWidth);
-
   //allocate memory for the three different channels
-  //original
   checkCudaErrors(cudaMalloc(&d_red,   sizeof(unsigned char) * numRowsImage * numColsImage));
   checkCudaErrors(cudaMalloc(&d_green, sizeof(unsigned char) * numRowsImage * numColsImage));
   checkCudaErrors(cudaMalloc(&d_blue,  sizeof(unsigned char) * numRowsImage * numColsImage));
@@ -300,7 +258,7 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
                         unsigned char *d_blueBlurred,
                         const int filterWidth)
 {
-  //TODO: Set reasonable block size (i.e., number of threads per block)
+  //Set reasonable block size (i.e., number of threads per block)
   const dim3 blockSize(filterWidth, filterWidth); // = threadsPerBlock
 
   //Compute correct grid size (i.e., number of blocks per kernel launch)
@@ -308,16 +266,6 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
 
   const int gridx = (numCols / blockSize.x) + 1;
   const int gridy = (numRows / blockSize.y) + 1;
-
-  // printf("Image Size: \n");
-  // printf("\trows: %lu \n", numRows);
-  // printf("\tcols: %lu \n", numCols);
-
-  // printf("Grid Size: \n");
-  // printf("\tx: %i \n", gridx);
-  // printf("\ty: %i \n", gridy);
-
-  // printf("Filter width: %i \n", filterWidth);
 
   const dim3 gridSize(gridx, gridy); // = numBlocks
 
