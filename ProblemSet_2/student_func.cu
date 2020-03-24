@@ -224,9 +224,9 @@ void allocateMemoryAndCopyToGPU(const size_t numRowsImage, const size_t numColsI
 {
 
   //allocate memory for the three different channels
-  checkCudaErrors(cudaMalloc(&d_red,   sizeof(unsigned char) * numRowsImage * numColsImage));
-  checkCudaErrors(cudaMalloc(&d_green, sizeof(unsigned char) * numRowsImage * numColsImage));
-  checkCudaErrors(cudaMalloc(&d_blue,  sizeof(unsigned char) * numRowsImage * numColsImage));
+  checkCudaErrors(cudaMalloc(&d_red,   sizeof(unsigned char) * numRowsImage * numColsImage - 1));
+  checkCudaErrors(cudaMalloc(&d_green, sizeof(unsigned char) * numRowsImage * numColsImage - 1));
+  checkCudaErrors(cudaMalloc(&d_blue,  sizeof(unsigned char) * numRowsImage * numColsImage - 1));
 
   //Allocate memory for the filter on the GPU
   //Use the pointer d_filter that we have already declared for you
