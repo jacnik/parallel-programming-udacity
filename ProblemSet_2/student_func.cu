@@ -126,6 +126,11 @@ void gaussian_blur(const unsigned char* const inputChannel,
 
   const auto i = y * numCols + x;
 
+  // if ( i == (557 / 2) + (313/2) * numCols) {
+  //   printf("i = %i, (x,y) = (%i, %i) \n", i, x, y);
+  //   printf("inputChannel[i] = %d \n", inputChannel[i]);
+  // }
+
   const auto filterHalf = filterWidth / 2;
 
   float acc = 0.0f;
@@ -154,10 +159,10 @@ void gaussian_blur(const unsigned char* const inputChannel,
     }
   }
 
-  if ( i == (557 / 2) + (313/2) * numCols) {
-    printf("i = %i, (x,y) = (%i, %i) \n", i, x, y);
-    printf("inputChannel[i] = (%d) \n", inputChannel[i]);
-  }
+  // if ( i == (557 / 2) + (313/2) * numCols) {
+  //   printf("i = %i, (x,y) = (%i, %i) \n", i, x, y);
+  //   printf("inputChannel[i] = (%d) \n", inputChannel[i]);
+  // }
 
   // if (i == 5 * numCols + 5 ) {
   //   printf("i: = %i : (x, y) = (%i, %i) \n", i, x, y);
@@ -204,14 +209,13 @@ void separateChannels(const uchar4* const inputImageRGBA,
 
   const uchar4 rgba = inputImageRGBA[i];
 
-  if ( i == (557 / 2) + (313/2) * numCols) {
-    printf("i = %i, (x,y) = (%i, %i) \n", i, x, y);
-    printf("rgba.x = %d\n", rgba.x);
-    printf("rgba.y = %d\n", rgba.y);
-    printf("rgba.z = %d\n", rgba.z);
-    printf("\n");
-
-  }
+  // if ( i == (557 / 2) + (313/2) * numCols) {
+  //   printf("i = %i, (x,y) = (%i, %i) \n", i, x, y);
+  //   printf("rgba.x = %d\n", rgba.x);
+  //   printf("rgba.y = %d\n", rgba.y);
+  //   printf("rgba.z = %d\n", rgba.z);
+  //   printf("\n");
+  // }
 
   redChannel[i] = rgba.x;
   greenChannel[i] = rgba.y;
@@ -318,7 +322,7 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
   const dim3 gridSize(gridx, gridy); // = numBlocks
 
   //Launch a kernel for separating the RGBA image into different color channels
-  separateChannels<<<gridSize, blockSize>>>(d_inputImageRGBA, numRows, numCols, d_redBlurred, d_greenBlurred, d_blueBlurred);
+  separateChannels<<<gridSize, blockSize>>>(d_inputImageRGBA, numRows, numCols, d_red, d_green, d_blue);
 
   // Call cudaDeviceSynchronize(), then call checkCudaErrors() immediately after
   // launching your kernel to make sure that you didn't make any mistakes.
@@ -326,8 +330,8 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
 
   //Call your convolution kernel here 3 times, once for each color channel.
   gaussian_blur<<<gridSize, blockSize>>>(d_red,   d_redBlurred,   numRows, numCols, d_filter, filterWidth);
-  // gaussian_blur<<<gridSize, blockSize>>>(d_green, d_greenBlurred, numRows, numCols, d_filter, filterWidth);
-  // gaussian_blur<<<gridSize, blockSize>>>(d_blue,  d_blueBlurred,  numRows, numCols, d_filter, filterWidth);
+  gaussian_blur<<<gridSize, blockSize>>>(d_green, d_greenBlurred, numRows, numCols, d_filter, filterWidth);
+  gaussian_blur<<<gridSize, blockSize>>>(d_blue,  d_blueBlurred,  numRows, numCols, d_filter, filterWidth);
 
   // Again, call cudaDeviceSynchronize(), then call checkCudaErrors() immediately after
   // launching your kernel to make sure that you didn't make any mistakes.
