@@ -108,6 +108,18 @@ void gaussian_blur(const unsigned char* const inputChannel,
                    int numRows, int numCols,
                    const float* const filter, const int filterWidth)
 {
+  const int filterCacheCol = threadIdx.x;
+  const int filterCacheRow = threadIdx.y;
+
+  const int filterCacheIndex = filterCacheRow * filterWidth + filterCacheCol;
+
+  __shared__ float filterCache[81];
+  if (filterCacheIndex < filterWidth * filterWidth) {
+    filterCache[filterCacheIndex] = filter[filterCacheIndex];
+  }
+
+  __syncthreads();
+
   // pixel(x,y)
   const int x = (blockIdx.x * blockDim.x) + threadIdx.x; // column
   const int y = (blockIdx.y * blockDim.y) + threadIdx.y; // row
@@ -124,31 +136,19 @@ void gaussian_blur(const unsigned char* const inputChannel,
       return;
   }
 
-  // const int filterColx = threadIdx.x;
-  // const int filterRowy = threadIdx.y;
-
-  // const int filterIndex = filterRowy * filterWidth + filterColx;
-
-  // __shared__ float filterCache[81];
-  // if (filterIndex < filterWidth * filterWidth) {
-  //   filterCache[filterIndex] = filter[filterIndex];
-  // }
-
-  // __syncthreads();
-
   const auto i = y * numCols + x;
 
   const auto filterHalf = filterWidth / 2;
 
   float acc = 0.0f;
 
-  int imgRow = 0;
-  int imgCol = 0;
-  int imgIndex = 0;
+  int imgRow;
+  int imgCol;
+  int imgIndex;
 
-  int filterRow = 0;
-  int filterCol = 0;
-  int filterIndex = 0;
+  int filterRow;
+  int filterCol;
+  int filterIndex;
 
   for (auto row = -1*filterHalf; row <= filterHalf; ++row) {
     for (auto col = -1*filterHalf; col <= filterHalf; ++col) {
@@ -161,7 +161,7 @@ void gaussian_blur(const unsigned char* const inputChannel,
       filterCol = col + filterHalf;
       filterIndex = filterRow * filterWidth + filterCol;
 
-      acc += inputChannel[imgIndex] * filter[filterIndex]; // filterCache[filterIndex];
+      acc += inputChannel[imgIndex] * filterCache[filterIndex];
     }
   }
 
