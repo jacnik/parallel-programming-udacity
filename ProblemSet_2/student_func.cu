@@ -141,32 +141,29 @@ void gaussian_blur(const unsigned char* const inputChannel,
   const auto filterHalf = filterWidth / 2;
 
   float acc = 0.0f;
-  for (auto filterIndex = 0; filterIndex < filterWidth * filterWidth; ++filterIndex) {
 
-    int row = filterIndex / filterWidth - filterHalf;
-    int col = filterIndex % filterWidth - filterHalf;
+  int imgRow = 0;
+  int imgCol = 0;
+  int imgIndex = 0;
 
-    auto imgRow = min(max(y + row, 0), numRows - 1);
-    auto imgCol = min(max(x + col, 0), numCols - 1);
-    auto imgIndex = imgRow * numCols + imgCol;
+  int filterRow = 0;
+  int filterCol = 0;
+  int filterIndex = 0;
 
-    acc += inputChannel[imgIndex] * filter[filterIndex]; // filterCache[filterIndex];
+  for (auto row = -1*filterHalf; row <= filterHalf; ++row) {
+    for (auto col = -1*filterHalf; col <= filterHalf; ++col) {
+
+      imgRow = min(max(y + row, 0), numRows - 1);
+      imgCol = min(max(x + col, 0), numCols - 1);
+      imgIndex = imgRow * numCols + imgCol;
+
+      filterRow = row + filterHalf;
+      filterCol = col + filterHalf;
+      filterIndex = filterRow * filterWidth + filterCol;
+
+      acc += inputChannel[imgIndex] * filter[filterIndex]; // filterCache[filterIndex];
+    }
   }
-
-  // for (auto row = -1*filterHalf; row <= filterHalf; ++row) {
-  //   for (auto col = -1*filterHalf; col <= filterHalf; ++col) {
-
-  //     auto imgRow = min(max(y + row, 0), numRows-1);
-  //     auto imgCol = min(max(x + col, 0), numCols-1);
-  //     auto imgIndex = imgRow * numCols + imgCol;
-
-  //     auto filterRow = row + filterHalf;
-  //     auto filterCol = col + filterHalf;
-  //     auto filterIndex = filterRow * filterWidth + filterCol;
-
-  //     acc += inputChannel[imgIndex] * filter[filterIndex]; // filterCache[filterIndex];
-  //   }
-  // }
 
   outputChannel[i] = static_cast<char>(acc);
 
