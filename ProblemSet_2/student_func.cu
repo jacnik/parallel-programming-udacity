@@ -150,9 +150,10 @@ void gaussian_blur(const unsigned char* const inputChannel,
   int filterIndex = 0;
 
   for (auto row = 0; row < filterWidth; ++row) {
+
+    imgRow = min(max(y + row - filterHalf, 0), numRows - 1);
     for (auto col = 0; col < filterWidth; ++col) {
 
-      imgRow = min(max(y + row - filterHalf, 0), numRows - 1);
       imgCol = min(max(x + col - filterHalf, 0), numCols - 1);
       imgIndex = imgRow * numCols + imgCol;
 
