@@ -124,25 +124,49 @@ void gaussian_blur(const unsigned char* const inputChannel,
       return;
   }
 
+  // const int filterColx = threadIdx.x;
+  // const int filterRowy = threadIdx.y;
+
+  // const int filterIndex = filterRowy * filterWidth + filterColx;
+
+  // __shared__ float filterCache[81];
+  // if (filterIndex < filterWidth * filterWidth) {
+  //   filterCache[filterIndex] = filter[filterIndex];
+  // }
+
+  // __syncthreads();
+
   const auto i = y * numCols + x;
 
   const auto filterHalf = filterWidth / 2;
 
   float acc = 0.0f;
-  for (auto row = -1*filterHalf; row <= filterHalf; ++row) {
-    for (auto col = -1*filterHalf; col <= filterHalf; ++col) {
+  for (auto filterIndex = 0; filterIndex < filterWidth * filterWidth; ++filterIndex) {
 
-      auto imgRow = min(max(y + row, 0), numRows-1);
-      auto imgCol = min(max(x + col, 0), numCols-1);
-      auto imgIndex = imgRow * numCols + imgCol;
+    int row = filterIndex / filterWidth - filterHalf;
+    int col = filterIndex % filterWidth - filterHalf;
 
-      auto filterRow = row + filterHalf;
-      auto filterCol = col + filterHalf;
-      auto filterIndex = filterRow * filterWidth + filterCol;
+    auto imgRow = min(max(y + row, 0), numRows - 1);
+    auto imgCol = min(max(x + col, 0), numCols - 1);
+    auto imgIndex = imgRow * numCols + imgCol;
 
-      acc += inputChannel[imgIndex] * filter[filterIndex];
-    }
+    acc += inputChannel[imgIndex] * filter[filterIndex]; // filterCache[filterIndex];
   }
+
+  // for (auto row = -1*filterHalf; row <= filterHalf; ++row) {
+  //   for (auto col = -1*filterHalf; col <= filterHalf; ++col) {
+
+  //     auto imgRow = min(max(y + row, 0), numRows-1);
+  //     auto imgCol = min(max(x + col, 0), numCols-1);
+  //     auto imgIndex = imgRow * numCols + imgCol;
+
+  //     auto filterRow = row + filterHalf;
+  //     auto filterCol = col + filterHalf;
+  //     auto filterIndex = filterRow * filterWidth + filterCol;
+
+  //     acc += inputChannel[imgIndex] * filter[filterIndex]; // filterCache[filterIndex];
+  //   }
+  // }
 
   outputChannel[i] = static_cast<char>(acc);
 
