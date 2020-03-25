@@ -139,8 +139,7 @@ void gaussian_blur(const unsigned char* const inputChannel,
 
   const auto i = y * numCols + x;
 
-  const auto filterDiffy = y - filterWidth / 2;
-  const auto filterDiffx = x - filterWidth / 2;
+  const auto filterHalf = filterWidth / 2;
 
   float acc = 0.0f;
 
@@ -152,10 +151,10 @@ void gaussian_blur(const unsigned char* const inputChannel,
 
   for (auto row = 0; row < filterWidth; ++row) {
 
-    imgRow = numCols * min(max(filterDiffy + row, 0), numRows - 1);
+    imgRow = numCols * min(max(y - filterHalf + row, 0), numRows - 1);
     for (auto col = 0; col < filterWidth; ++col) {
 
-      imgCol = min(max(filterDiffx + col , 0), numCols - 1);
+      imgCol = min(max(x - filterHalf + col , 0), numCols - 1);
       imgIndex = imgRow + imgCol;
 
       acc += inputChannel[imgIndex] * filterCache[filterIndex];
