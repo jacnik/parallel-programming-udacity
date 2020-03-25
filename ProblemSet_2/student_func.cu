@@ -108,6 +108,7 @@ void gaussian_blur(const unsigned char* const inputChannel,
                    int numRows, int numCols,
                    const float* const filter, const int filterWidth)
 {
+  // cache filter in shared memory
   const int filterCacheCol = threadIdx.x;
   const int filterCacheRow = threadIdx.y;
 
