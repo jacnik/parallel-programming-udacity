@@ -114,7 +114,7 @@ void gaussian_blur(const unsigned char* const inputChannel,
 
   const int filterCacheIndex = filterCacheRow * filterWidth + filterCacheCol;
 
-  __shared__ float filterCache[81];
+  extern __shared__ float filterCache[];
   if (filterCacheIndex < filterWidth * filterWidth) {
     filterCache[filterCacheIndex] = filter[filterCacheIndex];
   }
@@ -299,10 +299,11 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
   // launching your kernel to make sure that you didn't make any mistakes.
   cudaDeviceSynchronize(); checkCudaErrors(cudaGetLastError());
 
+  const auto sharedMemorySize = filterWidth * filterWidth * sizeof(float);
   //Call your convolution kernel here 3 times, once for each color channel.
-  gaussian_blur<<<gridSize, blockSize>>>(d_red,   d_redBlurred,   numRows, numCols, d_filter, filterWidth);
-  gaussian_blur<<<gridSize, blockSize>>>(d_green, d_greenBlurred, numRows, numCols, d_filter, filterWidth);
-  gaussian_blur<<<gridSize, blockSize>>>(d_blue,  d_blueBlurred,  numRows, numCols, d_filter, filterWidth);
+  gaussian_blur<<<gridSize, blockSize, sharedMemorySize>>>(d_red,   d_redBlurred,   numRows, numCols, d_filter, filterWidth);
+  gaussian_blur<<<gridSize, blockSize, sharedMemorySize>>>(d_green, d_greenBlurred, numRows, numCols, d_filter, filterWidth);
+  gaussian_blur<<<gridSize, blockSize, sharedMemorySize>>>(d_blue,  d_blueBlurred,  numRows, numCols, d_filter, filterWidth);
 
   // Again, call cudaDeviceSynchronize(), then call checkCudaErrors() immediately after
   // launching your kernel to make sure that you didn't make any mistakes.
