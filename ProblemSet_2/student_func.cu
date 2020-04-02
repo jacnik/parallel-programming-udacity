@@ -281,8 +281,10 @@ void your_gaussian_blur(const uchar4 * const h_inputImageRGBA, uchar4 * const d_
                         unsigned char *d_blueBlurred,
                         const int filterWidth)
 {
-  const int thx = filterWidth;
-  const int thy = filterWidth;
+  const int MAX_THREADS = 1024;
+
+  const int thx = filterWidth * filterWidth;
+  const int thy = MAX_THREADS / thx;
   // const int thz = filterWidth * filterWidth; // index into filter array
 
   //Set reasonable block size (i.e., number of threads per block)
